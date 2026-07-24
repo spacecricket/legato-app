@@ -1,8 +1,4 @@
 allowBuilds:
   esbuild: true
-  vue-demi: false
+  vue-demi: true
   workerd: true
-minimumReleaseAgeExclude:
-  - '@cloudflare/vite-plugin@1.47.0'
-  - miniflare@4.20260722.0
-  - wrangler@4.114.0
