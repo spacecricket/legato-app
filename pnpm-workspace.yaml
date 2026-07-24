@@ -2,3 +2,6 @@ allowBuilds:
   esbuild: true
   vue-demi: true
   workerd: true
+packages:
+  - '.'
+  
