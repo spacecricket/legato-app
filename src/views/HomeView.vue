@@ -7,29 +7,27 @@
       Slack and its clones are noisy. They clutter our workspace
       and make it hard to tell what's important. Legato helps teams stay focused
       by providing an experience that protects attention and encourages depth in
-      communication. If your teams seem distracted by existing chat tools,
-      Legato is built (actually, being built) for you.
+      communication. If your teams face distraction due to existing chat tools,
+      Legato is (being built) for you.
     </p>
   </div>
   <div class="flex flex-row items-center justify-center pt-16">
     <Button>
-      Sign in
+      <RouterLink :to="{ name: 'sign-in' }">
+        Sign in
+      </RouterLink>
       <LogIn />
     </Button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { RouterLink } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { LogIn } from '@lucide/vue'
 </script>
 
 <style scoped>
-.logo-icon {
-  width: 8rem;
-  height: 8rem;
-}
-
 .logo-text {
   font-family: 'Alex Brush', cursive;
   font-size: 12rem;
