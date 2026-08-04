@@ -11,6 +11,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/sign-in',
     name: 'sign-in',
     component: () => import('@/views/SignInView.vue')
+  },
+  {
+    path: '/:workspaceSlug',
+    name: 'inbox',
+    component: () => import('@/views/workspace/InboxView.vue')
   }
 ]
 

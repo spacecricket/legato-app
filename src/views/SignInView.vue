@@ -1,37 +1,54 @@
+<!--
+SignInView coordinates the display of StartSignInForm and VerifySignInForm.
+Initially, StartSignInForm is shown. After the user submits his email,
+If the user is already signed in with that email, then SignInView redirects
+the user to his workspace.
+
+If the user needs to verify his sign-in, he is shown the VerifySignInForm.
+
+If the user provides the verification code in time, SignInView redirects
+the user to his workspace.
+
+If the verification code is wrong or not provided in time, then the user
+has can try again, which triggers SignInView to show StartSignInForm.
+-->
 <template>
-  sign in
+  <StartSignInForm
+    v-if="!inVerification"
+    :initial-email="email"
+    @success="handleSuccessfulSignIn"
+    @verify="handlePendingVerification"
+  />
+  <VerifySignInForm
+    v-else
+    :email="email"
+    @success="handleSuccessfulSignIn"
+    @restart="handleRestart"
+  />
 </template>
 
 <script setup lang="ts">
-/*
-How this page works:
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-The first stage is SOLICIT_EMAIL. The user is presented with an input
-to enter his email. On clicking submit, the following will happen:
+import StartSignInForm from '@/components/sign-in/StartSignInForm.vue'
+import VerifySignInForm from '@/components/sign-in/VerifySignInForm.vue'
 
-Call `/api/sign-in/start`.
+const email = ref('')
+const router = useRouter()
+const inVerification = ref(false)
 
-If the user is already signed in, we get that info in the response.
-The stage will change to SIGNED_IN and the user will be redirected
-to his workspace.
+function handlePendingVerification({ email: submittedEmail }: { email: string }) {
+  email.value = submittedEmail
+  inVerification.value = true
+}
 
-If the user is not found, the API will state he's pending-verification,
-and the stage will change to PENDING_VERIFICATION.
+function handleSuccessfulSignIn({ workspaceSlug }: { workspaceSlug: string }) {
+  router.push({ name: 'inbox', params: { workspaceSlug } })
+}
 
-If the user is found, the API will state he's pending-verification,
-and the stage will change to PENDING_VERIFICATION. The backend will
-send the user the sign-in verification email with a 6-digit code.
-
-When in PENDING_VERIFICATION..
-
-The user can enter the requested code. This calls `/api/sign-in/verify`.
-If the code was correct, the user is signed-in and redirected to his workspace.
-
-If the code was incorrect, the stage changes to FAILED_VERIFICATION.
-The user may try again, which takes him back to the SOLICIT_EMAIL stage.
-
-If the user does not enter a code within 5 minutes, the stage changes to
-VERIFICATION_TIMED_OUT. The user may try again, which takes him back to the
-SOLICIT_EMAIL stage.
- */
+function handleRestart() {
+  inVerification.value = false
+}
 </script>
+
