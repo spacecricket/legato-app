@@ -77,6 +77,7 @@ import {
 import { Input } from '@/components/ui/input'
 
 import type { SignInResponse } from '@/shared/sign-in/types'
+import { apiFetch } from '@/api/client'
 
 const { initialEmail } = defineProps<{ initialEmail: string }>()
 const emit = defineEmits<{
@@ -110,14 +111,10 @@ const onSubmit = handleSubmit(async (data) => {
   errorMessage.value = ''
 
   try {
-    const response = await fetch("http://localhost:4000/api/sign-in/start", {
+    const { status, workspaceSlug, error } = await apiFetch<SignInResponse>('/api/sign-in/start', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: data.email }),
-        credentials: 'include'
+        body: JSON.stringify({ email: data.email })
     })
-
-    const { status, workspaceSlug, error }: SignInResponse = await response.json()
 
     switch (status) {
       case 'signed-in':

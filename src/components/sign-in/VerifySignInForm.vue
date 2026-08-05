@@ -54,7 +54,7 @@ import { ref, onBeforeMount } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm, Field as VeeField } from 'vee-validate'
 import { z } from 'zod'
-
+import { apiFetch } from '@/api/client'
 import type { SignInResponse } from '@/shared/sign-in/types'
 import { Button } from '@/components/ui/button'
 import {
@@ -113,14 +113,10 @@ const onSubmit = handleSubmit(async (data) => {
   errorMessage.value = ''
 
   try {
-      const response = await fetch("http://localhost:4000/api/sign-in/verify", {
+      const { status, workspaceSlug, error } = await apiFetch<SignInResponse>('/api/sign-in/verify', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, code: data.code }),
-          credentials: 'include'
+          body: JSON.stringify({ email, code: data.code })
       })
-
-      const { status, workspaceSlug, error }: SignInResponse = await response.json()
 
       switch (status) {
         case 'signed-in':
