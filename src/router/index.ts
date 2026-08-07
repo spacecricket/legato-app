@@ -14,8 +14,14 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/:workspaceSlug',
-    name: 'inbox',
-    component: () => import('@/views/workspace/InboxView.vue')
+    component: () => import('@/views/workspace/WorkspaceLayoutView.vue'),
+    children: [
+      {
+        path: '',
+        name: 'inbox',
+        component: () => import('@/views/workspace/InboxView.vue')
+      }
+    ]
   }
 ]
 
