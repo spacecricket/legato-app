@@ -11,7 +11,7 @@
       Legato is (being built) for you.
     </p>
   </div>
-  <div class="flex flex-row items-center justify-center pt-16">
+  <div class="flex flex-row items-center justify-center p-16">
     <Button>
       <RouterLink :to="{ name: 'sign-in' }">
         Sign in
