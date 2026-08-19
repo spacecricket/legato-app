@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw, type RouteLocationNormalized } from 'vue-router'
+import { useSocketStore } from '@/stores/socket'
 import HomeView from '@/views/HomeView.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -15,6 +16,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/:workspaceSlug',
     component: () => import('@/views/workspace/WorkspaceLayoutView.vue'),
+    beforeEnter: workspaceGuard,
     children: [
       {
         path: '',
@@ -24,6 +26,18 @@ const routes: Array<RouteRecordRaw> = [
     ]
   }
 ]
+
+async function workspaceGuard(to: RouteLocationNormalized) {
+  const { workspaceSlug } = to.params
+
+  const socketStore = useSocketStore()
+
+  if (socketStore.connectedWorkspaceSlug !== workspaceSlug) {
+    await socketStore.connect(workspaceSlug as string)
+  }
+
+  return socketStore.connectedWorkspaceSlug === workspaceSlug
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

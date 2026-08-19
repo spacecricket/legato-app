@@ -44,6 +44,7 @@ function handlePendingVerification({ email: submittedEmail }: { email: string })
 }
 
 function handleSuccessfulSignIn({ workspaceSlug }: { workspaceSlug: string }) {
+  console.log(`going to /${workspaceSlug}`)
   router.push({ name: 'inbox', params: { workspaceSlug } })
 }
 

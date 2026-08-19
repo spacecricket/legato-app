@@ -43,7 +43,7 @@ StartSignInForm is responsible for:
             Reset
           </Button>
           <Button type="submit" form="start-sign-in-form">
-            Get Code
+            Sign in
           </Button>
         </Field>
         <FieldError v-if="errorMessage" :errors="[errorMessage]" />
