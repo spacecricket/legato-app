@@ -7,8 +7,8 @@
       Slack and its clones are noisy. They clutter our workspace
       and make it hard to tell what's important. Legato helps teams stay focused
       by providing an experience that protects attention and encourages depth in
-      communication. If your teams face distraction due to existing chat tools,
-      Legato is (being built) for you.
+      communication. If your teams find chat distracting,
+      Legato is being built for you.
     </p>
   </div>
   <div class="flex flex-row items-center justify-center p-16">
