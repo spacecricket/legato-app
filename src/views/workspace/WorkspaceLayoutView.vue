@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-col h-dvh w-full max-w-5xl border-2 border-green-400 items-center absolute left-1/2 -translate-x-1/2">
-    <header class="shrink-0 border-4 w-full">
+  <div class="flex flex-col h-dvh w-full max-w-5xl items-center absolute left-1/2 -translate-x-1/2">
+    <header class="shrink-0 w-full">
       <WorkspaceToolbar :workspace-slug />
     </header>
     <RouterView />

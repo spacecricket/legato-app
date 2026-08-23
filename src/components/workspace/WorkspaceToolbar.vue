@@ -1,11 +1,11 @@
 <template>
-  <div v-if="workspace" class="flex justify-between items-center">
-    <div id="left-section" class="w-40 p-4 flex items-center gap-2">
+  <div class="flex justify-between items-center border-b-neutral-400">
+    <div id="left-section" class="w-40 p-3 flex items-center gap-2">
       <Button
-        v-if="me"
+        v-if="workspace"
         variant="ghost"
         size="icon"
-        class="group relative rounded-full"
+        class="group relative rounded-full mr-2"
         as-child
       >
         <button>
@@ -28,15 +28,15 @@
       </Button>
     </div>
     <div id="center-section">
-      <div class="flex flex-row justify-center items-center gap-1.5">
+      <div class="flex flex-row justify-center items-center gap-1">
         <img class="logo-icon" src="@/assets/logo-chat.svg" alt="legato logo" />
         <span class="logo-text">legato</span>
         <span class="view-name-badge">{{view}}</span>
       </div>
     </div>
-    <div id="right-section" class="w-40 p-4 flex justify-end items-center gap-2">
+    <div id="right-section" class="w-40 p-3 flex justify-end items-center gap-2">
       <Button variant="ghost" class="rounded-full">
-        <MessagesSquare />
+        <Balloon />
       </Button>
       <Button variant="ghost" class="rounded-full">
         <LogOut />
@@ -45,13 +45,13 @@
         v-if="me"
         variant="ghost"
         size="icon"
-        class="group relative rounded-full"
+        class="group relative rounded-full ml-2"
         as-child
       >
         <button>
           <!-- Avatar Wrapper -->
           <Avatar class="size-12">
-            <AvatarImage :src="me.avatarUrl ?? ''" />
+            <AvatarImage :src="me.avatarUrl ?? `https://api.dicebear.com/10.x/clay/svg?seed=${me.handle}`" />
             <AvatarFallback>{{`@${me.handle[0]}`}}</AvatarFallback>
           </Avatar>
           <!-- Hover Spanner Badge -->
@@ -61,9 +61,6 @@
         </button>
       </Button>
     </div>
-  </div>
-  <div v-else>
-    not loaded
   </div>
 </template>
 
@@ -75,7 +72,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useUserStore } from '@/stores/user'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { Button } from '@/components/ui/button'
-import { LogOut, MessagesSquare, Search, Siren, Wrench } from '@lucide/vue'
+import { Balloon, LogOut, Search, Siren, Wrench } from '@lucide/vue'
 
 const { workspace } = storeToRefs(useWorkspaceStore())
 const { me } = storeToRefs(useUserStore())
@@ -86,13 +83,13 @@ const view = computed(() => route.name)
 
 <style scoped>
 .logo-icon {
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
 }
 
 .logo-text {
   font-family: 'Alex Brush', cursive;
-  font-size: 3rem;
+  font-size: 2.25rem;
   color: var(--text-primary);
   font-weight: 400;
   user-select: none;

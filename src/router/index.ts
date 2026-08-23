@@ -20,7 +20,7 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: '',
-        name: 'inbox',
+        name: 'work',
         component: () => import('@/views/workspace/InboxView.vue')
       }
     ]
