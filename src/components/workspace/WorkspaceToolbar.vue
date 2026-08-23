@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between items-center border-b-neutral-400">
+  <div class="flex justify-between items-center border-b-neutral-400 pt-3">
     <div id="left-section" class="w-40 p-3 flex items-center gap-2">
       <Button
         v-if="workspace"
