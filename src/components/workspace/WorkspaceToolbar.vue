@@ -27,7 +27,7 @@
         <Siren />
       </Button>
     </div>
-    <div id="center-section"">
+    <div id="center-section">
       <div class="flex flex-row justify-center items-center gap-1.5">
         <img class="logo-icon" src="@/assets/logo-chat.svg" alt="legato logo" />
         <span class="logo-text">legato</span>
