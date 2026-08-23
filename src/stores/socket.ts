@@ -2,6 +2,8 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { Socket } from 'phoenix'
 import { apiFetch } from '@/api/client'
+import { useUserStore } from '@/stores/user'
+import { useWorkspaceStore } from '@/stores/workspace'
 
 interface TokenResponse {
     token: string
@@ -17,6 +19,9 @@ export const useSocketStore = defineStore('socket', () => {
     const { token } = await apiFetch<TokenResponse>(`/api/sign-in/token?${query}`)
 
     // TODO instantiate stores before connecting
+    useUserStore()
+    useWorkspaceStore()
+
     const socketUrl = import.meta.env.VITE_PHOENIX_SOCKET_URL
     const socket_ = new Socket(socketUrl, { params: { token } })
 
