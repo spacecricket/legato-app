@@ -21,7 +21,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '',
         name: 'work',
-        component: () => import('@/views/workspace/InboxView.vue')
+        component: () => import('@/views/workspace/WorkView.vue')
       }
     ]
   }
@@ -32,11 +32,11 @@ async function workspaceGuard(to: RouteLocationNormalized) {
 
   const socketStore = useSocketStore()
 
-  if (socketStore.connectedWorkspaceSlug !== workspaceSlug) {
+  if (socketStore.workspaceSlug !== workspaceSlug) {
     await socketStore.connect(workspaceSlug as string)
   }
 
-  return socketStore.connectedWorkspaceSlug === workspaceSlug
+  return socketStore.workspaceSlug === workspaceSlug
 }
 
 const router = createRouter({

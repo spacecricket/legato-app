@@ -24,7 +24,7 @@
         <Search />
       </Button>
       <Button variant="ghost" class="rounded-full">
-        <Siren />
+        <Zap color="red" />
       </Button>
     </div>
     <div id="center-section">
@@ -51,7 +51,7 @@
         <button>
           <!-- Avatar Wrapper -->
           <Avatar class="size-12">
-            <AvatarImage :src="me.avatarUrl ?? `https://api.dicebear.com/10.x/clay/svg?seed=${me.handle}`" />
+            <AvatarImage :src="me.avatarUrl!" />
             <AvatarFallback>{{`@${me.handle[0]}`}}</AvatarFallback>
           </Avatar>
           <!-- Hover Spanner Badge -->
@@ -72,7 +72,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useUserStore } from '@/stores/user'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { Button } from '@/components/ui/button'
-import { Balloon, LogOut, Search, Siren, Wrench } from '@lucide/vue'
+import { Balloon, LogOut, Search, Wrench, Zap } from '@lucide/vue'
 
 const { workspace } = storeToRefs(useWorkspaceStore())
 const { me } = storeToRefs(useUserStore())

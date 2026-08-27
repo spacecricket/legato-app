@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-dvh w-full max-w-5xl items-center absolute left-1/2 -translate-x-1/2 p-2">
+  <div class="flex flex-col h-dvh w-full max-w-5xl items-center absolute left-1/2 -translate-x-1/2 p-2 pb-0">
     <header class="shrink-0 w-full">
       <WorkspaceToolbar :workspace-slug />
     </header>

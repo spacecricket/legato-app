@@ -7,16 +7,21 @@ import { useWorkspaceStore } from '@/stores/workspace'
 
 interface TokenResponse {
     token: string
+    workspaceId: string
+    userId: string
 }
 
 export const useSocketStore = defineStore('socket', () => {
   // const socket = ref<Socket>()
-  const connectedWorkspaceSlug = ref<string>()
+  const isConnected = ref(false)
+  const workspaceSlug = ref<string>()
+  const workspaceId = ref<string>()
+  const userId = ref<string>()
 
-  const connect = async (workspaceSlug: string): Promise<void> => {
-    const query = new URLSearchParams({ workspaceSlug }).toString()
+  const connect = async (workspaceSlug_: string): Promise<void> => {
+    const query = new URLSearchParams({ workspaceSlug: workspaceSlug_ }).toString()
 
-    const { token } = await apiFetch<TokenResponse>(`/api/sign-in/token?${query}`)
+    const { token, workspaceId: workspaceId_, userId: userId_ } = await apiFetch<TokenResponse>(`/api/sign-in/token?${query}`)
 
     // TODO instantiate stores before connecting
     useUserStore()
@@ -40,15 +45,22 @@ export const useSocketStore = defineStore('socket', () => {
       socket_.connect()
 
       socket_.onOpen(() => {
+        isConnected.value = true
+        workspaceSlug.value = workspaceSlug_
+        workspaceId.value = workspaceId_
+        userId.value = userId_
+
         console.log("Socket connected successfully.")
-        connectedWorkspaceSlug.value = workspaceSlug
-        console.log(`now connectedWorkspaceSlug is ${connectedWorkspaceSlug.value}`)
         resolve()
       })
 
       socket_.onClose(() => {
+        isConnected.value = false
+        workspaceSlug.value = undefined
+        workspaceId.value = undefined
+        userId.value = undefined
+
         console.log("Socket connection closed.")
-        connectedWorkspaceSlug.value = undefined
         reject('error')
       })
     })
@@ -56,8 +68,10 @@ export const useSocketStore = defineStore('socket', () => {
 
   return {
     // state
-    // socket,
-    connectedWorkspaceSlug,
+    isConnected,
+    workspaceSlug,
+    workspaceId,
+    userId,
     // actions
     connect
   }
