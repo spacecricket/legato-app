@@ -76,7 +76,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 
-import type { SignInResponse } from '@/shared/sign-in/types'
+import type { SignInResponse } from '@/types/sign_in'
 import { apiFetch } from '@/api/client'
 
 const { initialEmail } = defineProps<{ initialEmail: string }>()

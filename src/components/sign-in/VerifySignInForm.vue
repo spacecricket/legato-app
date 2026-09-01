@@ -55,7 +55,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm, Field as VeeField } from 'vee-validate'
 import { z } from 'zod'
 import { apiFetch } from '@/api/client'
-import type { SignInResponse } from '@/shared/sign-in/types'
+import type { SignInResponse } from '@/types/sign_in'
 import { Button } from '@/components/ui/button'
 import {
   Card,

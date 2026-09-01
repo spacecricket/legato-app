@@ -1,18 +1,8 @@
 import { computed, ref, reactive, watch } from 'vue'
 import { defineStore, storeToRefs } from 'pinia'
 import { useSocketStore } from '@/stores/socket'
+import type { User } from '@/types/workspace'
 import { apiFetch } from '@/api/client'
-
-type User = {
-  id: string
-  firstName: string
-  lastName: string
-  handle: string
-  avatarUrl: string
-  isGuest: boolean
-  isDeleted: boolean
-  updatedAt: Date
-}
 
 function isOverADayOld(date: Date): boolean {
   const oneDayInMs = 24 * 60 * 60 * 1000; // 86,400,000 ms
@@ -38,7 +28,7 @@ export const useUserStore = defineStore('user', () => {
         const users = await apiFetch<User[]>(`/api/workspaces/${updatedWorkspaceId}/users`)
         userMap.clear()
         for (const user of users) {
-          userMap.set(user.id, {...user, avatarUrl: `https://api.dicebear.com/10.x/clay/svg?seed=${user.handle}`})
+          userMap.set(user.id, {...user, avatar_url: `https://api.dicebear.com/10.x/clay/svg?seed=${user.handle}`})
         }
         workspaceIdUsed.value = updatedWorkspaceId
         fetchedAt.value = new Date()

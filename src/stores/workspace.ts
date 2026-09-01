@@ -2,14 +2,7 @@ import { ref, watch } from 'vue'
 import { defineStore, storeToRefs } from 'pinia'
 import { useSocketStore } from '@/stores/socket'
 import { apiFetch } from '@/api/client'
-
-type Workspace = {
-  id: string
-  slug: string
-  name: string
-  logoUrl: string | null
-  updatedAt: Date
-}
+import type { Workspace } from '@/types/workspace'
 
 function isOverADayOld(date: Date): boolean {
   const oneDayInMs = 24 * 60 * 60 * 1000; // 86,400,000 ms
