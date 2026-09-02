@@ -23,9 +23,6 @@
       <Button variant="ghost" class="rounded-full">
         <Search />
       </Button>
-      <Button variant="ghost" class="rounded-full">
-        <Zap color="red" />
-      </Button>
     </div>
     <div id="center-section">
       <div class="flex flex-row justify-center items-center gap-1.5">
@@ -36,10 +33,7 @@
     </div>
     <div id="right-section" class="w-40 p-3 flex justify-end items-center gap-2">
       <Button variant="ghost" class="rounded-full">
-        <Balloon />
-      </Button>
-      <Button variant="ghost" class="rounded-full">
-        <LogOut />
+        <Ellipsis />
       </Button>
       <Button
         v-if="me"
@@ -72,7 +66,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useUserStore } from '@/stores/user'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { Button } from '@/components/ui/button'
-import { Balloon, LogOut, Search, Wrench, Zap } from '@lucide/vue'
+import { Ellipsis, Search, Wrench } from '@lucide/vue'
 
 const { workspace } = storeToRefs(useWorkspaceStore())
 const { me } = storeToRefs(useUserStore())

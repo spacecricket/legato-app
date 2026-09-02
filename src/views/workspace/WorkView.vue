@@ -11,8 +11,13 @@
     </div>
 
     <!-- Inbox Items: fills remaining space inside the inner wrapper -->
-    <div class="w-full shrink min-h-0 overflow-y-auto overflow-x-hidden p-2">
-      <ThreadSummaryCard v-for="threadSummary in activeThreadSummaries" :key="threadSummary.thread!.id" :thread-summary="threadSummary" />
+    <div class="w-full shrink min-h-0 overflow-y-auto overflow-x-hidden p-2 pl-5 pr-5 group">
+      <ThreadSummaryCard
+        v-for="threadSummary in activeThreadSummaries"
+        :key="threadSummary.thread!.id"
+        :thread-summary="threadSummary"
+        class="cursor-pointer group-hover:opacity-10 hover:opacity-100!"
+      />
     </div>
 
     <!-- Blanket: always pinned to the bottom -->
