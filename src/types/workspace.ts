@@ -50,8 +50,8 @@ export type ThreadMessage = {
   version: number
   threadId: string
   userId: string
-  contents: string
-  contentsFormatVersion: number
+  content: string
+  contentFormatVersion: number
   sequenceNumber: number
   isDeleted: boolean
   insertedAt: Date

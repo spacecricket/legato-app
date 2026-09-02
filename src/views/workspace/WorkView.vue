@@ -16,7 +16,7 @@
     </div>
 
     <!-- Blanket: always pinned to the bottom -->
-    <div class="w-full flex-1 flex flex-col border-t rounded-t-3xl border-t-green-200 bg-green-100 p-1 m-1 mb-0 items-center align-top min-h-18">
+    <div class="w-full flex-1 flex flex-col border-t rounded-t-3xl border-t-green-300 bg-green-200 p-1 m-1 mb-0 items-center align-top min-h-18">
       <!-- <Button variant="ghost" class="rounded-full" size="lg"> -->
         <ChevronUp :size="32" v-on:click="console.log('hi')" />
       <!-- </Button> -->

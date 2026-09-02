@@ -46,8 +46,8 @@ import { Badge } from '@/components/ui/badge'
 import { DateTime } from 'luxon'
 import { ThreadSummary } from '@/types/workspace'
 
-function formatTimestamp(isoString: string, { weekday = false } = {}) {
-  const dt = DateTime.fromISO(isoString)
+function formatTimestamp(date: Date, { weekday = false } = {}) {
+  const dt = DateTime.fromJSDate(date)
   if (!dt.isValid) return ''
   return dt.hasSame(DateTime.now(), 'day')
     ? dt.toLocaleString(DateTime.TIME_SIMPLE)
@@ -85,16 +85,19 @@ const avatars = computed<AvatarInfo[]>(() => {
 
 const plusN = computed(() => members.value.length - avatars.value.length)
 
-const formattedTimestamp = computed(() => formatTimestamp((threadSummary.latestMessage?.updatedAt ?? new Date()).toISOString()))
+const formattedTimestamp = computed(() => formatTimestamp(threadSummary.latestMessage?.updatedAt ?? threadSummary.thread!.updatedAt))
 
 const previewMessage = computed<string>(() => {
-  // const message = threadSummary.latestMessage
-  // const fromUserId = message.from
-  // const from = userStore.user(fromUserId)
 
-  // if (!from) return ''
+  const message = threadSummary.latestMessage
 
-  // return `@${from.handle}: ${message.contents}`
-  return `@$TBD: A message`
+  if (!message) return ''
+
+  const { userId } = message
+  const user = userStore.user(userId)
+
+  if (!user) return ''
+
+  return `@${user.handle}: ${message.content}`
 })
 </script>
