@@ -28,7 +28,7 @@ export const useUserStore = defineStore('user', () => {
         const users = await apiFetch<User[]>(`/api/workspaces/${updatedWorkspaceId}/users`)
         userMap.clear()
         for (const user of users) {
-          userMap.set(user.id, {...user, avatar_url: `https://api.dicebear.com/10.x/clay/svg?seed=${user.handle}`})
+          userMap.set(user.id, {...user, avatarUrl: `https://api.dicebear.com/10.x/clay/svg?seed=${user.handle}`})
         }
         workspaceIdUsed.value = updatedWorkspaceId
         fetchedAt.value = new Date()

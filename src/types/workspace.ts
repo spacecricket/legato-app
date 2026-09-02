@@ -2,78 +2,127 @@ export type Workspace = {
   id: string
   slug: string
   name: string
-  logo_url: string
-  is_deleted: boolean
-  created_at: Date
-  updated_at: Date
+  logoUrl: string
+  isDeleted: boolean
+  updatedAt: Date
 }
 
 export type User = {
   id: string
   handle: string
-  first_name: string
-  last_name: string
-  avatar_url: string
-  is_guest: boolean
-  is_deleted: boolean
+  firstName: string
+  lastName: string
+  avatarUrl: string
+  isGuest: boolean
+  isDeleted: boolean
+  updatedAt: Date
 }
 
 export type Thread = {
   id: string
   name: string
-  is_private: boolean
-  message_count: number
-  is_deleted: boolean
-  created_at: Date
-  updated_at: Date
+  isPrivate: boolean
+  messageCount: number
+  isDeleted: boolean
+  insertedAt: Date
+  updatedAt: Date
 }
 
 export type ThreadMember = {
   id: string
-  thread_id: string
-  user_id: string
-  is_deleted: boolean
-  created_at: Date
-  updated_at: Date
+  threadId: string
+  userId: string
+  isDeleted: boolean
+  insertedBy: string
+  updatedBy: string
+  insertedAt: Date
+  updatedAt: Date
+}
+
+export type Watermark = {
+  threadId: string
+  sequenceNumber: number
+  updatedAt: Date | null
 }
 
 export type ThreadMessage = {
   id: string
   version: number
-  thread_id: string
-  user_id: string
+  threadId: string
+  userId: string
   contents: string
-  contents_format_version: number
-  sequence_number: number
-  is_deleted: boolean
-  created_at: Date
-  updated_at: Date
+  contentsFormatVersion: number
+  sequenceNumber: number
+  isDeleted: boolean
+  insertedAt: Date
+  updatedAt: Date
 }
 
 export type Zap = {
   id: string
-  from_user_id: string
-  to_user_id: string
-  thread_id: string
-  message_id: string
-  is_deleted: boolean
-  is_acked: boolean
-  created_at: Date
-  updated_at: Date
-}
-
-export type LastMessageSeen = {
-  id: string
+  fromUserId: string
+  toUserId: string
   threadId: string
-  userId: string
-  messageSequenceNumber: number
+  messageId: string
+  isDeleted: boolean
+  isAcked: boolean
+  insertedAt: Date
   updatedAt: Date
 }
 
-export type ThreadSummary = {
-  thread: Thread
-  threadMembers: ThreadMember[]
-  latestMessage: ThreadMessage
-  zaps: Zap[]
-  lastMessageSeen: LastMessageSeen
+export class ThreadSummary {
+  // 1. Property Declarations with Type Annotations
+  thread: Thread | null
+  inboundZaps: Map<string, Zap>
+  threadMembers: Map<string, ThreadMember>
+  watermark: Watermark | null
+  latestMessage: ThreadMessage | null
+
+  // 2. The Constructor to Initialize Properties
+  constructor() {
+    this.thread = null
+    this.inboundZaps = new Map()
+    this.threadMembers = new Map()
+    this.watermark = null
+    this.latestMessage = null
+  }
+
+  setThread(thread: Thread): void {
+    const old = this.thread
+    if (!old || old.updatedAt.getTime() < thread.updatedAt.getTime()) {
+      this.thread = thread
+    }
+  }
+
+  setInboundZap(zap: Zap): void {
+    const { id } = zap
+
+    const old = this.inboundZaps.get(id)
+    if (!old || old.updatedAt.getTime() < zap.updatedAt.getTime()) {
+      this.inboundZaps.set(id, zap)
+    }
+  }
+
+  setThreadMember(threadMember: ThreadMember): void {
+    const { id } = threadMember
+
+    const old = this.threadMembers.get(id)
+    if (!old || old.updatedAt.getTime() < threadMember.updatedAt.getTime()) {
+      this.threadMembers.set(id, threadMember)
+    }
+  }
+
+  setWatermark(watermark: Watermark): void {
+    const old = this.watermark
+    if (!old || !old.updatedAt || old.updatedAt.getTime() < watermark.updatedAt!.getTime()) {
+      this.watermark = watermark
+    }
+  }
+
+  setLatestMessage(threadMessage: ThreadMessage): void {
+    const old = this.latestMessage
+    if (!old || old.sequenceNumber < threadMessage.sequenceNumber) {
+      this.latestMessage = threadMessage
+    }
+  }
 }

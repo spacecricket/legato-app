@@ -10,7 +10,7 @@
       >
         <button>
           <Avatar class="size-12">
-            <AvatarImage :src="workspace.logo_url ?? ''" />
+            <AvatarImage :src="workspace.logoUrl ?? ''" />
             <AvatarFallback>{{workspace.name[0]}}</AvatarFallback>
           </Avatar>
           <!-- Hover Spanner Badge -->
@@ -51,7 +51,7 @@
         <button>
           <!-- Avatar Wrapper -->
           <Avatar class="size-12">
-            <AvatarImage :src="me.avatar_url!" />
+            <AvatarImage :src="me.avatarUrl" />
             <AvatarFallback>{{`@${me.handle[0]}`}}</AvatarFallback>
           </Avatar>
           <!-- Hover Spanner Badge -->

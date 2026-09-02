@@ -3,7 +3,7 @@
     <!-- <div class="min-w-6 flex items-center">
       <Zap v-if="threadSummary.zaps?.length" color="red" />
     </div> -->
-    <div class="flex gap-0.5 min-w-40 items-center">
+    <div class="flex gap-0.5 min-w-44 items-center">
       <div class="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2">
         <Avatar v-for="avatar in avatars" :key="avatar.handle" class="size-12">
           <AvatarImage :src="avatar.avatarUrl ?? ''" :alt="`@${avatar.handle}`" />
@@ -21,10 +21,10 @@
     <div class="flex flex-col gap-1 w-full overflow-x-hidden">
       <div class="flex flex-1 justify-between">
         <div class="flex gap-2 overflow-hidden">
-          <Badge v-if="threadSummary.isPrivate" variant="destructive">
+          <Badge v-if="threadSummary.thread!.isPrivate" variant="destructive">
             Private
           </Badge>
-          <div class="text-ellipsis text-nowrap overflow-hidden font-semibold">{{ threadSummary.name }}</div>
+          <div class="text-ellipsis text-nowrap overflow-hidden font-semibold">{{ threadSummary.thread!.name }}</div>
         </div>
         <div class="text-xs shrink-0">{{ formattedTimestamp }}</div>
       </div>
@@ -38,45 +38,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 // import { Check, Dot, Zap } from '@lucide/vue'
-import { Zap } from '@lucide/vue'
+// import { Zap } from '@lucide/vue'
 import { useSocketStore } from '@/stores/socket'
 import { useUserStore } from '@/stores/user'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { DateTime } from 'luxon'
-
-type Message = {
-  id: string
-  from: string
-  contents: string
-  sequenceNumber: number
-  isDeleted: boolean
-  createdAt: Date
-  updatedAt: Date
-}
-
-type Zap = {
-  id: string
-  from: string
-  to: string
-  threadId: string
-  messageId: string
-  isAcknowledged: boolean
-  createdAt: Date
-  updatedAt: Date
-}
-
-type ThreadSummary = {
-  id: string
-  name: string
-  participants: string[]
-  isPrivate: boolean
-  messageCount: number
-  lastSeenMessageSequenceNumber: number
-  latestMessage: Message
-  zaps: Zap[]
-  updatedAt: Date
-}
+import { ThreadSummary } from '@/types/workspace'
 
 function formatTimestamp(isoString: string, { weekday = false } = {}) {
   const dt = DateTime.fromISO(isoString)
@@ -94,34 +62,39 @@ type AvatarInfo = {
   avatarUrl: string
   handle: string
 }
-const avatars = computed<AvatarInfo[]>(() => {
-  return threadSummary.participants.slice(0, 3).flatMap(userId => {
-    // No point seeing my own avatar
-    if (userId === socketStore.userId) return []
 
-    const user = userStore.user(userId)
-    if (!user) return []
-
-    const { avatarUrl, handle } = user
-
-    return {
-      avatarUrl,
-      handle
-    }
-  })
+const members = computed(() => {
+  return Array.from(threadSummary.threadMembers.values())
+    .map(member => userStore.user(member.userId)!)
 })
 
-const plusN = computed(() => threadSummary.participants.length - avatars.value.length - 1)
+const avatars = computed<AvatarInfo[]>(() => {
+  return members.value
+    .flatMap(user => {
+      if (user.id === socketStore.userId) return []
 
-const formattedTimestamp = computed(() => formatTimestamp(threadSummary.latestMessage.updatedAt.toISOString()))
+      const { avatarUrl, handle } = user
+
+      return {
+        avatarUrl,
+        handle
+      }
+    })
+    .slice(0, 3)
+})
+
+const plusN = computed(() => members.value.length - avatars.value.length)
+
+const formattedTimestamp = computed(() => formatTimestamp((threadSummary.latestMessage?.updatedAt ?? new Date()).toISOString()))
 
 const previewMessage = computed<string>(() => {
-  const message = threadSummary.latestMessage
-  const fromUserId = message.from
-  const from = userStore.user(fromUserId)
+  // const message = threadSummary.latestMessage
+  // const fromUserId = message.from
+  // const from = userStore.user(fromUserId)
 
-  if (!from) return ''
+  // if (!from) return ''
 
-  return `@${from.handle}: ${message.contents}`
+  // return `@${from.handle}: ${message.contents}`
+  return `@$TBD: A message`
 })
 </script>

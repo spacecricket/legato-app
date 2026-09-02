@@ -12,7 +12,7 @@
 
     <!-- Inbox Items: fills remaining space inside the inner wrapper -->
     <div class="w-full shrink min-h-0 overflow-y-auto overflow-x-hidden p-2">
-      <!-- <ThreadSummary v-for="threadSummary in zappedAndNewThreadSummaries" :key="threadSummary.id" :thread-summary="threadSummary" /> -->
+      <ThreadSummaryCard v-for="threadSummary in activeThreadSummaries" :key="threadSummary.thread!.id" :thread-summary="threadSummary" />
     </div>
 
     <!-- Blanket: always pinned to the bottom -->
@@ -30,61 +30,13 @@ import { computed, reactive, onMounted, onUnmounted } from 'vue'
 import { Button } from '@/components/ui/button'
 import { ChevronUp, Plus } from '@lucide/vue'
 import { useSocketStore } from '@/stores/socket'
-import type { LastMessageSeen, Thread, ThreadMember, ThreadMessage, Zap } from '@/types/workspace'
+import type { Thread, ThreadMember, ThreadMessage, Watermark, Zap } from '@/types/workspace'
+import { ThreadSummary } from '@/types/workspace'
 import type { Channel } from 'phoenix'
 import { apiFetch } from '@/api/client'
-
-// import ThreadSummary from '@/components/workspace/ThreadSummary.vue'
+import ThreadSummaryCard from '@/components/workspace/ThreadSummaryCard.vue'
 
 const socketStore = useSocketStore()
-
-class ThreadSummary {
-  // 1. Property Declarations with Type Annotations
-  inboundZaps: Map<string, Zap>
-  threadMembers: Map<string, ThreadMember>
-  lastMessageSeen: LastMessageSeen | null
-  latestMessage: ThreadMessage | null
-
-  // 2. The Constructor to Initialize Properties
-  constructor() {
-    this.inboundZaps = new Map()
-    this.threadMembers = new Map()
-    this.lastMessageSeen = null
-    this.latestMessage = null
-  }
-
-  setInboundZap(zap: Zap): void {
-    const { id } = zap
-
-    const old = this.inboundZaps.get(id)
-    if (!old || old.updatedAt.getTime() < zap.updatedAt.getTime()) {
-      this.inboundZaps.set(id, zap)
-    }
-  }
-
-  setThreadMember(threadMember: ThreadMember): void {
-    const { id } = threadMember
-
-    const old = this.threadMembers.get(id)
-    if (!old || old.updatedAt.getTime() < threadMember.updatedAt.getTime()) {
-      this.threadMembers.set(id, threadMember)
-    }
-  }
-
-  setLastMessageSeen(lastMessageSeen: LastMessageSeen): void {
-    const old = this.lastMessageSeen
-    if (!old || old.updatedAt.getTime() < lastMessageSeen.updatedAt.getTime()) {
-      this.lastMessageSeen = lastMessageSeen
-    }
-  }
-
-  setLatestMessage(threadMessage: ThreadMessage): void {
-    const old = this.latestMessage
-    if (!old || old.sequenceNumber < threadMessage.sequenceNumber) {
-      this.latestMessage = threadMessage
-    }
-  }
-}
 
 const threadSummaryMap = reactive(new Map<string /* threadId */, ThreadSummary>())
 
@@ -94,14 +46,16 @@ function getThreadSummary(threadId: string): ThreadSummary {
   return threadSummary
 }
 
-const threadMap = reactive(new Map<string /* threadId */, Thread>())
-
 let channel: Channel | null = null
 
 onMounted(async () => {
   channel = socketStore.getChannel(`user:${socketStore.userId}`)
 
   if (channel) {
+    channel.on('thread', (thread: Thread) => {
+      getThreadSummary(thread.id).setThread(thread)
+    })
+
     channel.on('inbound-zap', (zap: Zap) => {
       getThreadSummary(zap.threadId).setInboundZap(zap)
     })
@@ -110,8 +64,8 @@ onMounted(async () => {
       getThreadSummary(threadMember.threadId).setThreadMember(threadMember)
     })
 
-    channel.on('last-message-seen', (lastMessageSeen: LastMessageSeen) => {
-      getThreadSummary(lastMessageSeen.threadId).setLastMessageSeen(lastMessageSeen)
+    channel.on('watermark', (watermark: Watermark) => {
+      getThreadSummary(watermark.threadId).setWatermark(watermark)
     })
 
     channel.on('latest-thread-message', (threadMessage: ThreadMessage) => {
@@ -124,6 +78,9 @@ onMounted(async () => {
 
     // get all active thread summaries
     const threadSummaries = await apiFetch<ThreadSummary[]>(`/api/workspaces/${socketStore.workspaceId}/users/${socketStore.userId}/active-thread-summaries`)
+    threadSummaries.forEach(threadSummary => {
+      threadSummaryMap.set(threadSummary.thread!.id, threadSummary)
+    })
 
     // get first page of inactive thread summaries
   } else {
@@ -136,6 +93,21 @@ onUnmounted(() => {
     channel.leave()
   }
 })
+
+const activeThreadSummaries = computed<ThreadSummary[]>(() => {
+  return Array.from(threadSummaryMap.values()).filter((threadSummary) => {
+    if (!threadSummary.thread) return false
+    if (threadSummary.inboundZaps.size > 0) return true
+
+    if (threadSummary.watermark
+      && threadSummary.thread
+      && threadSummary.watermark.sequenceNumber <= threadSummary.thread.messageCount) {
+      return true
+    }
+
+    return false
+  })
+})
 /*
 
 GET /api/workspaces/{id}/users/{me}/thread-summaries?since=...&count=50 // all
@@ -145,9 +117,9 @@ GET /api/workspaces/{id}/users/{me}/thread-summaries?pending-action=true
 get all where lms < message count, and where exists unacked inbound zap
 
 on socket reconnect, we want any updates we might have missed
-GET /api/workspaces/{id}/users/{me}/thread-summaries?since=threadSummariesLastUpdatedAt
-GET /api/workspaces/{id}/users/{me}/last-message-seen?since=lastMessageSeenLastUpdatedAt
-GET /api/workspaces/{id}/users/{me}/zaps?since=zapsLastUpdatedAt
+GET /api/workspaces/{id}/users/{me}/thread-summaries?since=threadSummariesLastupdatedAt
+GET /api/workspaces/{id}/users/{me}/last-message-seen?since=lastMessageSeenLastupdatedAt
+GET /api/workspaces/{id}/users/{me}/zaps?since=zapsLastupdatedAt
  */
 
 // const zappedThreads = computed<ThreadSummary[]>(() => {
