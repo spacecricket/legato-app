@@ -1,5 +1,5 @@
 <template>
-  <div class="flex p-2 pb-6">
+  <div class="flex p-2 pb-4">
     <!-- <div class="min-w-6 flex items-center">
       <Zap v-if="threadSummary.zaps?.length" color="red" />
     </div> -->

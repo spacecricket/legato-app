@@ -3,7 +3,7 @@
   <div class="w-full max-w-5xl flex-1 min-h-0 flex flex-col items-center">
 
     <!-- Inbox Toolbar: fixed height -->
-    <div class="w-full shrink-0 m-1 flex gap-3 justify-end">
+    <div class="w-full shrink-0 m-3 flex gap-3 justify-end">
       <Button variant="outline" class="rounded-full text-xs">
         <Plus />
         Create thread
@@ -16,9 +16,9 @@
     </div>
 
     <!-- Blanket: always pinned to the bottom -->
-    <div class="w-full flex-1 flex flex-col border-t rounded-t-3xl border-t-green-300 bg-green-200 p-1 m-1 mb-0 items-center align-top min-h-18">
+    <div class="w-full flex-1 flex flex-col border-t rounded-t-3xl border-t-gray-200 p-1 m-1 mb-0 items-center align-top min-h-18">
       <!-- <Button variant="ghost" class="rounded-full" size="lg"> -->
-        <ChevronUp :size="32" v-on:click="console.log('hi')" />
+        <ChevronUp :size="24" v-on:click="console.log('hi')" />
       <!-- </Button> -->
     </div>
 
