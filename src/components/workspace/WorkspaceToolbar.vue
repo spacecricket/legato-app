@@ -28,7 +28,7 @@
       </Button>
     </div>
     <div id="center-section">
-      <div class="flex flex-row justify-center items-center gap-1">
+      <div class="flex flex-row justify-center items-center gap-1.5">
         <img class="logo-icon" src="@/assets/logo-chat.svg" alt="legato logo" />
         <span class="logo-text">legato</span>
         <span class="view-name-badge">{{view}}</span>
@@ -83,13 +83,13 @@ const view = computed(() => route.name)
 
 <style scoped>
 .logo-icon {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 .logo-text {
   font-family: 'Alex Brush', cursive;
-  font-size: 2.25rem;
+  font-size: 2.75rem;
   color: var(--text-primary);
   font-weight: 400;
   user-select: none;
@@ -97,7 +97,7 @@ const view = computed(() => route.name)
 }
 
 .view-name-badge {
-  font-size: 0.6875rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;

@@ -26,7 +26,7 @@
           </Badge>
           <div class="text-ellipsis text-nowrap overflow-hidden font-semibold">{{ threadSummary.thread!.name }}</div>
         </div>
-        <div class="text-xs shrink-0">{{ formattedTimestamp }}</div>
+        <div class="text-sm shrink-0">{{ formattedTimestamp }}</div>
       </div>
       <div class="text-ellipsis overflow-hidden text-nowrap text-neutral-700">
         {{ previewMessage }}
