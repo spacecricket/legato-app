@@ -16,7 +16,7 @@
         v-for="threadSummary in activeThreadSummaries"
         :key="threadSummary.thread!.id"
         :thread-summary="threadSummary"
-        class="cursor-pointer group-hover:opacity-10 hover:opacity-100!"
+        class="cursor-pointer transition-opacity duration-150 group-hover:opacity-10 hover:opacity-100! hover:saturate-150"
       />
     </div>
 
