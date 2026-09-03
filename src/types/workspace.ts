@@ -24,6 +24,7 @@ export type Thread = {
   isPrivate: boolean
   messageCount: number
   isDeleted: boolean
+  lastMessageAt: Date
   insertedAt: Date
   updatedAt: Date
 }
@@ -123,6 +124,10 @@ export class ThreadSummary {
     const old = this.latestMessage
     if (!old || old.sequenceNumber < threadMessage.sequenceNumber) {
       this.latestMessage = threadMessage
+      if (this.thread && threadMessage.sequenceNumber > this.thread.messageCount) {
+        this.thread.messageCount = threadMessage.sequenceNumber
+        this.thread.lastMessageAt = threadMessage.updatedAt
+      }
     }
   }
 }

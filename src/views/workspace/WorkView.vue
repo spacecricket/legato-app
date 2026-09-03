@@ -3,47 +3,88 @@
   <div class="w-full max-w-5xl flex-1 min-h-0 flex flex-col items-center">
 
     <!-- Inbox Toolbar: fixed height -->
-    <div class="w-full shrink-0 m-3 flex gap-3 justify-end">
+    <div v-if="!selectedThreadId" class="w-full shrink-0 m-3 flex gap-3 justify-end pr-5">
       <Button variant="outline" class="rounded-full text-xs">
         <Plus />
         Create thread
       </Button>
     </div>
+    <div v-else class="w-full shrink-0 m-3 flex gap-3 pl-5 pr-5 justify-between">
+      <Button
+        variant="outline"
+        class="rounded-full text-xs"
+        @click.stop="selectedThreadId = undefined"
+      >
+        <MoveLeft />
+        Back
+      </Button>
+      <div class="flex gap-3">
+        <Button
+          variant="outline"
+          class="rounded-full text-xs"
+        >
+          <Share />
+        </Button>
+        <Button
+          variant="outline"
+          class="rounded-full text-xs"
+        >
+          <Ellipsis />
+        </Button>
+      </div>
+    </div>
 
     <!-- Inbox Items: fills remaining space inside the inner wrapper -->
     <div class="w-full shrink min-h-0 overflow-y-auto overflow-x-hidden p-2 pl-5 pr-5">
-      <div class="group">
+      <div v-if="!selectedThreadId" class="group">
         <ThreadSummaryCard
           v-for="threadSummary in activeThreadSummaries"
           :key="threadSummary.thread!.id"
           :thread-summary="threadSummary"
+          @click.stop="selectedThreadId = threadSummary.thread!.id"
           class="cursor-pointer transition-opacity duration-150 group-hover:opacity-10 hover:opacity-100! hover:saturate-150"
         />
       </div>
+      <ThreadSummaryCard
+        v-else
+        :thread-summary="threadSummaryMap.get(selectedThreadId)!"
+      />
     </div>
 
+
     <!-- Blanket: always pinned to the bottom -->
-    <div class="w-full flex-1 flex flex-col border-t rounded-t-3xl border-t-gray-200 p-1 m-1 mb-0 items-center align-top min-h-18">
+    <div
+      v-if="!selectedThreadId"
+      class="w-full flex-1 flex flex-col border-t rounded-t-3xl border-t-gray-200 p-1 m-1 mb-0 items-center align-top min-h-18"
+    >
       <!-- <Button variant="ghost" class="rounded-full" size="lg"> -->
         <ChevronUp :size="24" v-on:click="console.log('hi')" />
       <!-- </Button> -->
+    </div>
+    <div
+      v-else
+      class="w-full flex-1 flex flex-col border rounded-3xl border-gray-200 p-1 m-1 mb-4 items-center align-top min-h-18"
+    >
+      <ThreadMessageContainer :thread-id="selectedThreadId" />
     </div>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, onMounted, onUnmounted } from 'vue'
+import { computed, ref, reactive, onMounted, onUnmounted } from 'vue'
 import { Button } from '@/components/ui/button'
-import { ChevronUp, Plus } from '@lucide/vue'
+import { ChevronUp, Ellipsis, MoveLeft, Plus, Share } from '@lucide/vue'
 import { useSocketStore } from '@/stores/socket'
 import type { Thread, ThreadMember, ThreadMessage, Watermark, Zap } from '@/types/workspace'
 import { ThreadSummary } from '@/types/workspace'
 import type { Channel } from 'phoenix'
 import { apiFetch } from '@/api/client'
 import ThreadSummaryCard from '@/components/workspace/ThreadSummaryCard.vue'
+import ThreadMessageContainer from '@/components/workspace/ThreadMessageContainer.vue'
 
 const socketStore = useSocketStore()
+const selectedThreadId = ref<string>()
 
 const threadSummaryMap = reactive(new Map<string /* threadId */, ThreadSummary>())
 
@@ -113,7 +154,7 @@ const activeThreadSummaries = computed<ThreadSummary[]>(() => {
     }
 
     return false
-  })
+  }) // TODO sort
 })
 /*
 
