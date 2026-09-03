@@ -1,5 +1,5 @@
 <template>
-  <div class="message-container flex w-full gap-3 p-2 rounded-2xl hover:bg-gray-50">
+  <div class="message-container flex w-full gap-3 p-2 rounded-2xl border border-transparent hover:bg-gray-50!">
     <Avatar class="size-12">
       <AvatarImage :src="user.avatarUrl" :alt="`@${user.handle}`" />
       <AvatarFallback>{{ user.handle[0] }}</AvatarFallback>
@@ -11,7 +11,7 @@
           <div class="sender-name font-semibold">{{ user.firstName ? `${user.firstName} ${user.lastName[0]}` : `@${user.handle}` }}</div>
           <div class="time text-xs font-light text-gray-600 pt-1">{{ formattedTimestamp }}</div>
         </div>
-        <Button variant="ghost" class="rounded-full">
+        <Button variant="ghost" class="rounded-full" size="xs">
           <Ellipsis />
         </Button>
       </div>
