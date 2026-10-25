@@ -42,7 +42,7 @@
           :key="threadSummary.thread!.id"
           :thread-summary="threadSummary"
           @click.stop="selectedThreadId = threadSummary.thread!.id"
-          class="cursor-pointer transition-opacity duration-150 group-hover:opacity-10 hover:opacity-100! hover:saturate-150"
+          class="cursor-pointer transition-opacity duration-150 group-hover:opacity-35 hover:opacity-100! hover:saturate-150"
         />
       </div>
       <ThreadSummaryCard
