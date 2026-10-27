@@ -24,15 +24,15 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "luxon": "^3.7.2",
-    "phoenix": "^1.8.9",
-    "pinia": "^4.0.2",
+    "phoenix": "1.8.15",
+    "pinia": "^4.1.0",
     "reka-ui": "^2.11.0",
-    "tailwind-merge": "^3.6.0",
+    "tailwind-merge": "^3.7.0",
     "tailwindcss": "^4.3.3",
     "vee-validate": "^4.15.1",
-    "vue": "^3.5.40",
-    "vue-router": "^5.2.0",
-    "zod": "^4.4.3"
+    "vue": "^3.5.44",
+    "vue-router": "^5.4.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.47.0",
