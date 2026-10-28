@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { defineStore } from 'pinia'
 import { Socket, Channel } from 'phoenix'
 import { apiFetch } from '@/api/client'
@@ -12,7 +12,9 @@ interface TokenResponse {
 }
 
 export const useSocketStore = defineStore('socket', () => {
-  const socket = ref<Socket>()
+  // the Socket must not be made reactive: phoenix.js compares its connection
+  // objects by identity, which a Vue proxy breaks
+  const socket = shallowRef<Socket>()
   const connectionState = ref<'disconnected' | 'connecting' | 'connected'>('disconnected')
   const isConnected = computed(() => connectionState.value === 'connected')
 
