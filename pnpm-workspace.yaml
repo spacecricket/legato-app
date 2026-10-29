@@ -3,9 +3,9 @@ allowBuilds:
   vue-demi: true
   workerd: true
 minimumReleaseAgeExclude:
-  - '@lucide/vue@1.62.0'
-  - miniflare@5.20261023.1-beta
-  - wrangler@4.154.0
+  - '@lucide/vue@1.62.0 || 1.64.0'
+  - miniflare@5.20261023.1-beta || 5.20261023.2-beta
+  - wrangler@4.154.0 || 4.155.0
   - '@oxlint/binding-android-arm-eabi@1.90.0'
   - '@oxlint/binding-android-arm64@1.90.0'
   - '@oxlint/binding-darwin-arm64@1.90.0'
@@ -27,5 +27,6 @@ minimumReleaseAgeExclude:
   - '@oxlint/binding-win32-x64-msvc@1.90.0'
   - eslint-plugin-oxlint@1.90.0
   - oxlint@1.90.0
+  - '@types/node@26.6.6'
 packages:
   - '.'
