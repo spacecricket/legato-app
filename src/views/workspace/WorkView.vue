@@ -51,16 +51,8 @@
       />
     </div>
 
-
     <!-- Blanket: always pinned to the bottom -->
-    <div
-      v-if="!selectedThreadId"
-      class="w-full flex-1 flex flex-col border-t rounded-t-3xl border-t-gray-200 p-1 m-1 mb-0 items-center align-top min-h-18"
-    >
-      <!-- <Button variant="ghost" class="rounded-full" size="lg"> -->
-        <ChevronUp :size="24" v-on:click="console.log('hi')" />
-      <!-- </Button> -->
-    </div>
+    <OldThreadCover v-if="!selectedThreadId" />
     <div
       v-else
       class="w-full flex-1 flex flex-col border rounded-3xl border-gray-200 p-1 m-1 mb-4 items-center align-top min-h-18"
@@ -74,12 +66,13 @@
 <script setup lang="ts">
 import { computed, ref, reactive, onMounted, onUnmounted } from 'vue'
 import { Button } from '@/components/ui/button'
-import { ChevronUp, Ellipsis, MoveLeft, Plus, Share } from '@lucide/vue'
+import { Ellipsis, MoveLeft, Plus, Share } from '@lucide/vue'
 import { useSocketStore } from '@/stores/socket'
 import type { Thread, ThreadMember, ThreadMessage, Watermark, Zap } from '@/types/workspace'
 import { ThreadSummary } from '@/types/workspace'
 import type { Channel } from 'phoenix'
 import { apiFetch } from '@/api/client'
+import OldThreadCover from '@/components/workspace/OldThreadCover.vue'
 import ThreadSummaryCard from '@/components/workspace/ThreadSummaryCard.vue'
 import ThreadMessageContainer from '@/components/workspace/ThreadMessageContainer.vue'
 
@@ -125,7 +118,7 @@ onMounted(async () => {
       .receive('error', (err) => console.error('Failed to attach:', err))
 
     // get all active thread summaries
-    const threadSummaries = await apiFetch<ThreadSummary[]>(`/api/workspaces/${socketStore.workspaceId}/users/${socketStore.userId}/active-thread-summaries`)
+    const { threadSummaries } = await apiFetch<{ threadSummaries: ThreadSummary[] }>(`/api/workspaces/${socketStore.workspaceId}/users/${socketStore.userId}/active-thread-summaries`)
     threadSummaries.forEach(threadSummary => {
       threadSummaryMap.set(threadSummary.thread!.id, threadSummary)
     })
@@ -146,10 +139,7 @@ const activeThreadSummaries = computed<ThreadSummary[]>(() => {
   return Array.from(threadSummaryMap.values()).filter((threadSummary) => {
     if (!threadSummary.thread) return false
     if (threadSummary.inboundZaps.size > 0) return true
-
-    if (threadSummary.watermark
-      && threadSummary.thread
-      && threadSummary.watermark.sequenceNumber <= threadSummary.thread.messageCount) {
+    if (threadSummary.watermark && threadSummary.watermark.sequenceNumber < threadSummary.thread.messageCount) {
       return true
     }
 
