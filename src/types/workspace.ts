@@ -131,3 +131,13 @@ export class ThreadSummary {
     }
   }
 }
+
+// Raw payload returned by the thread-summaries endpoints; collections are arrays
+// rather than the Maps used by ThreadSummary.
+export type ThreadSummaryResponse = {
+  thread: Thread | null
+  inboundZaps?: Zap[]
+  threadMembers: ThreadMember[]
+  watermark: Watermark | null
+  latestMessage: ThreadMessage | null
+}

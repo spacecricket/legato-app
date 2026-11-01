@@ -2,48 +2,40 @@
   <!-- Inner Wrapper: must fill remaining space and allow shrinking -->
   <div class="w-full max-w-5xl flex-1 min-h-0 flex flex-col items-center">
 
-    <!-- Inbox Toolbar: fixed height -->
-    <div v-if="!selectedThreadId" class="w-full shrink-0 m-3 flex gap-3 justify-end pr-5">
-      <Button variant="outline" class="rounded-full text-xs">
-        <Plus />
-        Create thread
-      </Button>
-    </div>
-    <div v-else class="w-full shrink-0 m-3 flex gap-3 pl-5 pr-5 justify-between">
-      <Button
-        variant="outline"
-        class="rounded-full text-xs"
-        @click.stop="selectedThreadId = undefined"
-      >
-        <MoveLeft />
-        Back
-      </Button>
-      <div class="flex gap-3">
-        <Button
-          variant="outline"
-          class="rounded-full text-xs"
-        >
-          <Share />
-        </Button>
-        <Button
-          variant="outline"
-          class="rounded-full text-xs"
-        >
-          <Ellipsis />
-        </Button>
-      </div>
-    </div>
+    <WorkToolbar
+      :is-thread-selected="selectedThreadId !== undefined"
+      @back="selectedThreadId = undefined"
+    />
 
     <!-- Inbox Items: fills remaining space inside the inner wrapper -->
-    <div class="w-full shrink min-h-0 overflow-y-auto overflow-x-hidden p-2 pl-5 pr-5">
+    <div
+      class="w-full shrink min-h-0 overflow-y-auto overflow-x-hidden"
+      @scroll="onThreadListScroll"
+    >
       <div v-if="!selectedThreadId" class="group">
         <ThreadSummaryCard
           v-for="threadSummary in activeThreadSummaries"
-          :key="threadSummary.thread!.id"
+          :key="threadSummary.thread.id"
           :thread-summary="threadSummary"
-          @click.stop="selectedThreadId = threadSummary.thread!.id"
-          class="cursor-pointer transition-opacity duration-150 group-hover:opacity-35 hover:opacity-100! hover:saturate-150"
+          @click.stop="selectedThreadId = threadSummary.thread.id"
+          class="cursor-pointer "
         />
+        <section
+          v-if="showInactiveThreads"
+          class="mt-2 pt-2 rounded-2xl bg-gray-100"
+          aria-label="Inactive threads"
+        >
+          <div class="px-3 pb-1 pt-1 text-sm font-semibold text-gray-500">
+            Inactive
+          </div>
+          <ThreadSummaryCard
+            v-for="threadSummary in inactiveThreadSummaries"
+            :key="threadSummary.thread.id"
+            :thread-summary="threadSummary"
+            @click.stop="selectedThreadId = threadSummary.thread.id"
+            class="cursor-pointer"
+          />
+        </section>
       </div>
       <ThreadSummaryCard
         v-else
@@ -52,7 +44,10 @@
     </div>
 
     <!-- Blanket: always pinned to the bottom -->
-    <OldThreadCover v-if="!selectedThreadId" />
+    <OldThreadCover
+      v-if="!selectedThreadId"
+      v-model:show-inactive-threads="showInactiveThreads"
+    />
     <div
       v-else
       class="w-full flex-1 flex flex-col border rounded-3xl border-gray-200 p-1 m-1 mb-4 items-center align-top min-h-18"
@@ -64,20 +59,42 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive, onMounted, onUnmounted } from 'vue'
-import { Button } from '@/components/ui/button'
-import { Ellipsis, MoveLeft, Plus, Share } from '@lucide/vue'
+import { computed, ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { useSocketStore } from '@/stores/socket'
-import type { Thread, ThreadMember, ThreadMessage, Watermark, Zap } from '@/types/workspace'
+import type {
+  Thread,
+  ThreadMember,
+  ThreadMessage,
+  ThreadSummaryResponse,
+  Watermark,
+  Zap,
+} from '@/types/workspace'
 import { ThreadSummary } from '@/types/workspace'
 import type { Channel } from 'phoenix'
 import { apiFetch } from '@/api/client'
+import { useLocalStorage } from '@/composables/localStorage'
 import OldThreadCover from '@/components/workspace/OldThreadCover.vue'
+import WorkToolbar from '@/components/workspace/WorkToolbar.vue'
 import ThreadSummaryCard from '@/components/workspace/ThreadSummaryCard.vue'
 import ThreadMessageContainer from '@/components/workspace/ThreadMessageContainer.vue'
 
 const socketStore = useSocketStore()
 const selectedThreadId = ref<string>()
+
+const INACTIVE_TARGET = 50
+const MAX_AUTO_PAGES = 10
+
+const { data: showInactiveThreadsData, setData: persistShowInactiveThreads } =
+  useLocalStorage('showInactiveThreads', false)
+
+const showInactiveThreads = computed<boolean>({
+  get: () => showInactiveThreadsData.value,
+  set: (value) => persistShowInactiveThreads(value),
+})
+
+let inactiveLoaded = false
+const inactiveLoading = ref(false)
+const nextInactiveCursor = ref<string | null>(null)
 
 const threadSummaryMap = reactive(new Map<string /* threadId */, ThreadSummary>())
 
@@ -85,6 +102,84 @@ function getThreadSummary(threadId: string): ThreadSummary {
   const threadSummary = threadSummaryMap.get(threadId) ?? new ThreadSummary()
   threadSummaryMap.set(threadId, threadSummary)
   return threadSummary
+}
+
+function mergeThreadSummary(raw: ThreadSummaryResponse) {
+  if (!raw.thread) return
+
+  const threadSummary = getThreadSummary(raw.thread.id)
+  threadSummary.setThread(raw.thread)
+  raw.threadMembers.forEach((member) => threadSummary.setThreadMember(member))
+  raw.inboundZaps?.forEach((zap) => threadSummary.setInboundZap(zap))
+  if (raw.watermark) threadSummary.setWatermark(raw.watermark)
+  if (raw.latestMessage) threadSummary.setLatestMessage(raw.latestMessage)
+}
+
+async function fetchActiveThreadSummaries() {
+  const { threadSummaries } = await apiFetch<{ threadSummaries: ThreadSummaryResponse[] }>(
+    `/api/workspaces/${socketStore.workspaceId}/users/${socketStore.userId}/active-thread-summaries`
+  )
+  threadSummaries.forEach(mergeThreadSummary)
+}
+
+async function fetchInactiveThreadSummariesPage(cursor: string | null) {
+  const params = new URLSearchParams()
+  if (cursor) params.set('cursor', cursor)
+  const query = params.toString()
+
+  const { threadSummaries, nextCursor } = await apiFetch<{
+    threadSummaries: ThreadSummaryResponse[]
+    nextCursor: string | null
+  }>(
+    `/api/workspaces/${socketStore.workspaceId}/users/${socketStore.userId}/thread-summaries${query ? `?${query}` : ''}`
+  )
+
+  threadSummaries.forEach(mergeThreadSummary)
+  nextInactiveCursor.value = nextCursor
+}
+
+async function loadInactiveThreadSummaries() {
+  if (inactiveLoaded || inactiveLoading.value) return
+
+  inactiveLoading.value = true
+  try {
+    let pages = 0
+
+    // The feed is activity-sorted and includes active threads, so keep paging
+    // until we have enough inactive rows to show or we run out of pages.
+    do {
+      await fetchInactiveThreadSummariesPage(nextInactiveCursor.value)
+      pages += 1
+    } while (
+      nextInactiveCursor.value !== null &&
+      inactiveThreadSummaries.value.length < INACTIVE_TARGET &&
+      pages < MAX_AUTO_PAGES
+    )
+
+    inactiveLoaded = true
+  } finally {
+    inactiveLoading.value = false
+  }
+}
+
+async function loadMoreInactiveThreadSummaries() {
+  if (inactiveLoading.value || nextInactiveCursor.value === null) return
+
+  inactiveLoading.value = true
+  try {
+    await fetchInactiveThreadSummariesPage(nextInactiveCursor.value)
+  } finally {
+    inactiveLoading.value = false
+  }
+}
+
+function onThreadListScroll(event: Event) {
+  if (!showInactiveThreads.value) return
+
+  const target = event.target as HTMLElement
+  if (target.scrollHeight - target.scrollTop - target.clientHeight < 200) {
+    loadMoreInactiveThreadSummaries()
+  }
 }
 
 let channel: Channel | null = null
@@ -118,12 +213,12 @@ onMounted(async () => {
       .receive('error', (err) => console.error('Failed to attach:', err))
 
     // get all active thread summaries
-    const { threadSummaries } = await apiFetch<{ threadSummaries: ThreadSummary[] }>(`/api/workspaces/${socketStore.workspaceId}/users/${socketStore.userId}/active-thread-summaries`)
-    threadSummaries.forEach(threadSummary => {
-      threadSummaryMap.set(threadSummary.thread!.id, threadSummary)
-    })
+    await fetchActiveThreadSummaries()
 
-    // get first page of inactive thread summaries
+    // get inactive thread summaries if the section is expanded
+    if (showInactiveThreads.value) {
+      await loadInactiveThreadSummaries()
+    }
   } else {
     console.error('socket has not been initialized yet')
   }
@@ -135,17 +230,52 @@ onUnmounted(() => {
   }
 })
 
-const activeThreadSummaries = computed<ThreadSummary[]>(() => {
-  return Array.from(threadSummaryMap.values()).filter((threadSummary) => {
-    if (!threadSummary.thread) return false
-    if (threadSummary.inboundZaps.size > 0) return true
-    if (threadSummary.watermark && threadSummary.watermark.sequenceNumber < threadSummary.thread.messageCount) {
-      return true
-    }
-
-    return false
-  }) // TODO sort
+watch(showInactiveThreads, (show) => {
+  if (show) loadInactiveThreadSummaries()
 })
+
+type ThreadedThreadSummary = ThreadSummary & { thread: Thread }
+
+function threadIsActive(threadSummary: ThreadSummary): boolean {
+  if (!threadSummary.thread) return false
+  if (threadSummary.inboundZaps.size > 0) return true
+
+  return (
+    threadSummary.watermark !== null &&
+    threadSummary.watermark.sequenceNumber < threadSummary.thread.messageCount
+  )
+}
+
+function compareThreadSummaries(a: ThreadedThreadSummary, b: ThreadedThreadSummary): number {
+  const aTime = a.thread.lastMessageAt?.getTime() ?? -Infinity
+  const bTime = b.thread.lastMessageAt?.getTime() ?? -Infinity
+  if (aTime !== bTime) return bTime - aTime
+
+  if (a.thread.id === b.thread.id) return 0
+  return a.thread.id < b.thread.id ? 1 : -1
+}
+
+function sortThreadSummaries(summaries: ThreadedThreadSummary[]): ThreadedThreadSummary[] {
+  return [...summaries].sort(compareThreadSummaries)
+}
+
+const activeThreadSummaries = computed(() =>
+  sortThreadSummaries(
+    Array.from(threadSummaryMap.values()).filter(
+      (threadSummary): threadSummary is ThreadedThreadSummary =>
+        threadSummary.thread !== null && threadIsActive(threadSummary)
+    )
+  )
+)
+
+const inactiveThreadSummaries = computed(() =>
+  sortThreadSummaries(
+    Array.from(threadSummaryMap.values()).filter(
+      (threadSummary): threadSummary is ThreadedThreadSummary =>
+        threadSummary.thread !== null && !threadIsActive(threadSummary)
+    )
+  )
+)
 /*
 
 GET /api/workspaces/{id}/users/{me}/thread-summaries?since=...&count=50 // all

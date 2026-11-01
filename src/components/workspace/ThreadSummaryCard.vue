@@ -4,7 +4,7 @@
       <Zap v-if="threadSummary.zaps?.length" color="red" />
     </div> -->
     <div class="flex gap-0.5 min-w-44 items-center">
-      <div class="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2">
+      <div class="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 pl-2">
         <Avatar v-for="avatar in avatars" :key="avatar.handle" class="size-12">
           <AvatarImage :src="avatar.avatarUrl ?? ''" :alt="`@${avatar.handle}`" />
           <AvatarFallback>{{ avatar.handle[0] }}</AvatarFallback>
@@ -26,7 +26,7 @@
           </Badge>
           <div class="text-ellipsis text-nowrap overflow-hidden font-semibold">{{ threadSummary.thread!.name }}</div>
         </div>
-        <div class="text-sm shrink-0">{{ formattedTimestamp }}</div>
+        <div class="text-sm shrink-0 pr-2">{{ formattedTimestamp }}</div>
       </div>
       <div class="text-ellipsis overflow-hidden text-nowrap text-neutral-700">
         {{ previewMessage }}
