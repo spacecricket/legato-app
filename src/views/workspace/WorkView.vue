@@ -13,6 +13,23 @@
       @scroll="onThreadListScroll"
     >
       <div v-if="!selectedThreadId" class="group">
+         <div
+           v-if="threadSummariesLoaded && activeThreadSummaries.length === 0"
+           class="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center"
+           role="status"
+         >
+           <div
+             class="flex size-16 items-center justify-center rounded-full text-emerald-500"
+           >
+             <ThumbsUp class="size-8" aria-hidden="true" />
+           </div>
+           <div>
+             <p class="text-lg font-semibold text-neutral-800">All's quiet on the work front</p>
+             <p class="mt-1 text-sm text-neutral-500">
+               No active threads right now. Enjoy the calm.
+             </p>
+           </div>
+         </div>
         <ThreadSummaryCard
           v-for="threadSummary in activeThreadSummaries"
           :key="threadSummary.thread.id"
@@ -60,6 +77,7 @@
 
 <script setup lang="ts">
 import { computed, ref, reactive, onMounted, onUnmounted, watch } from 'vue'
+import { ThumbsUp } from '@lucide/vue'
 import { useSocketStore } from '@/stores/socket'
 import type {
   Thread,
@@ -80,6 +98,7 @@ import ThreadMessageContainer from '@/components/workspace/ThreadMessageContaine
 
 const socketStore = useSocketStore()
 const selectedThreadId = ref<string>()
+const threadSummariesLoaded = ref(false)
 
 const INACTIVE_TARGET = 50
 const MAX_AUTO_PAGES = 10
@@ -120,6 +139,7 @@ async function fetchActiveThreadSummaries() {
     `/api/workspaces/${socketStore.workspaceId}/users/${socketStore.userId}/active-thread-summaries`
   )
   threadSummaries.forEach(mergeThreadSummary)
+  threadSummariesLoaded.value = true
 }
 
 async function fetchInactiveThreadSummariesPage(cursor: string | null) {
