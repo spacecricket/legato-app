@@ -1,6 +1,7 @@
 <template>
   <div
-    class="w-full flex-1 flex flex-col border-t rounded-t-3xl border-t-gray-200 p-1 m-1 mb-0 items-center align-top min-h-18"
+    class="w-full flex-1 flex flex-col rounded-t-3xl p-1 m-1 mb-0 items-center align-top min-h-18"
+    :class="{'bg-gray-100' : !showInactiveThreads}"
   >
     <Button
       variant="outline"
